@@ -1,0 +1,126 @@
+---
+title: "Time Series Forecast of Canadian Bankruptcy Rates"
+authors: "Donya Fozoonmayeh, Nicole Kacirek, Darren Thomas, Yuhan Wang"
+date: "12/8/2018"
+output: pdf_document
+---
+
+```{r setup, , echo=FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(forecast)
+library(tseries)
+library(zoo)
+library(xts)
+library(vars)
+```
+
+In order to model monthly bankruptcy rates, we first plotted monthly bankruptcy rate, unemployment rate, population and housing price index for January 1987 to December 2014.
+
+```{r, include=FALSE}
+training_data <- read.csv("train.csv")
+unemployment_rate <- ts(data = training_data$Unemployment_Rate, start = c(1987,1), end = c(2014,12), frequency = 12)
+population <- ts(data = training_data$Population, start = c(1987,1), end = c(2014,12), frequency = 12)
+bankruptcy_rate <- ts(data = training_data$Bankruptcy_Rate, start = c(1987,1), end = c(2014,12), frequency = 12)
+HPI <- ts(data = training_data$House_Price_Index, start = c(1987,1), end = c(2014,12), frequency = 12)
+```
+
+## 1. Unemployment Rate
+As it can be observed in the graph below, monthly unemployment rate has been variable throughout the years. The graph shows both trend and seasonality.
+
+```{r}
+plot(unemployment_rate, main="Monthly Unemployment Rate", ylab="Unemployment Rate")
+```
+
+## 2. Population
+The graph below shows monthly population. As it can be seen, there is a clear trend and population has increased over the years.
+
+```{r}
+plot(population, main="Monthly Population", ylab="Population")
+```
+
+## 3. Housing Price Index(HPI)
+The HPI plot shows an overall increase in HPI, with two significant spikes around 1990 and 2008.
+
+```{r}
+plot(HPI, main="Monthly Housing Price Index", ylab="Housing Price Index")
+```
+
+## 4. Banktrupcy Rate
+The graph for banktrupcy rate shows an overall increase. 
+
+```{r, echo=FALSE}
+plot(bankruptcy_rate, main="Monthly Banktrupcy Rate", ylab="Banktrupcy Rate")
+```
+
+Looking more closely, we can see that there is also a seasonal component for bankruptcy.
+
+```{r, echo=FALSE}
+bankruptcy_rate_more <- ts(data = training_data$Bankruptcy_Rate, start = c(2007,1), end = c(2013,12), frequency = 12)
+plot(bankruptcy_rate_more, main="Monthly Banktrupcy Rate", ylab="Banktrupcy Rate")
+```
+
+It can be observed from the graphs that there is a clear relationship between bankruptcy and HPI. We also thought that population and unemployment rate can influence bankruptcy rate. Therefore, in order to take into account these relationships, we decided to use a VAR model. Because we think that the relationship can be bidirectional, we avoided using a SARIMAX model.
+\newline
+We officially verified that there is a relationship between banktrupcy rate and population, HPI and unemployment rate by looking at the correlation between them.
+```{r}
+b_u <- cor(bankruptcy_rate, unemployment_rate)
+b_h <- cor(bankruptcy_rate, HPI)
+b_p <- cor(bankruptcy_rate, population)
+```
+
+In order to be able to measure how well we forecasted, we divided our dataset into two parts. One part for training our model and one for testing it. The training data is from January 1987 to December 2009 and the test data is from January 2010 to December 2014.  
+
+```{r}
+unemployment_rate_train <- ts(data = training_data$Unemployment_Rate, start = c(1987,1), end = c(2009,12), frequency = 12)
+population_train <- ts(data = training_data$Population, start = c(1987,1), end = c(2009,12), frequency = 12)
+bankruptcy_rate_train <- ts(data = training_data$Bankruptcy_Rate, start = c(1987,1), end = c(2009,12), frequency = 12)
+HPI_train <- ts(data = training_data$House_Price_Index, start = c(1987,1), end = c(2009,12), frequency = 12)
+
+unemployment_rate_test <- ts(data = training_data$Unemployment_Rate, start = c(2009,1), end = c(2014,12), frequency = 12)
+population_test <- ts(data = training_data$Population, start = c(2009,1), end = c(2014,12), frequency = 12)
+bankruptcy_rate_test <- ts(data = training_data$Bankruptcy_Rate, start = c(2009,1), end = c(2014,12), frequency = 12)
+HPI_test <- ts(data = training_data$House_Price_Index, start = c(2009,1), end = c(2014,12), frequency = 12)
+#par(mfrow = c(2,1))
+#plot(unemployment_rate_train, main="Monthly Unemployment Rate", ylab="Unemployment Rate")
+#plot(population_train, main="Monthly Population", ylab="Population")
+#plot(bankruptcy_rate_train, main="Monthly Banktrupcy Rate", ylab="Banktrupcy Rate")
+#plot(HPI_train, main="Monthly Housing Price Index", ylab="Housing Price Index")
+```
+
+We selected the optimal VAR model using AIC as our goodness-of-fit metric. Therefore, our optimal VAR model has the smallest AIC. Below a graph of the model and the actual observations can be seen.
+
+```{r, include=FALSE}
+VARselect(y = data.frame(bankruptcy_rate_train, population_train, HPI_train,unemployment_rate_train))
+model_var_train <- VAR(y = data.frame(bankruptcy_rate_train, population_train, HPI_train,unemployment_rate_train), p = 10)
+```
+
+```{r}
+# par(mar = rep(2, 4))
+# model_var <- VAR(y = data.frame(bankruptcy_rate, population, HPI, unemployment_rate), p = 10)
+# plot(model_var_train)
+```
+
+We then looked at the forecast of the model for the following five years: January 2009 to December 2014.
+
+```{r}
+#  par(fin=c(2,2))
+par(mar=c(1,1,1,1))
+pred <- predict(model_var_train, n.ahead = 48, ci = 0.95)
+plot(pred)
+```
+
+We calculated the RMSE for our model by subtracting the observed values from the predicted values. The RMSE of our model is 2.31. Considering that having an RMSE close to zero suggests that the predicted values are close to the observed values, we decided to pick this model to forecast the bankruptcy rate for 2015-2017.
+
+```{r, include=FALSE}
+rmse_var <- sqrt(mean((pred$fcst$bankruptcy_rate_train[,1] - bankruptcy_rate_test)^2))
+rmse_var
+```
+
+```{r}
+par(mar=c(1,1,1,1))
+VARselect(y = data.frame(bankruptcy_rate, population, HPI,unemployment_rate))
+model_var <- VAR(y = data.frame(bankruptcy_rate, population, HPI, unemployment_rate), p = 10)
+pred_actual <- predict(model_var, n.ahead = 48, ci = 0.95)
+plot(pred_actual)
+```
+
