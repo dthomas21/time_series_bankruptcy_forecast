@@ -1,9 +1,17 @@
 # Time Series Forecast - Forecasting Canadian bankruptcy rates using a VAR (Vector Autoregression) model.
 
-##### Contributors: Donya Fozoonmayeh, Nicole Kacirek, Darren Thomas, Yuhan Wang
-
 ### Motivation
-Bankruptcy rate is an issue of concern for various interested parties, including banks, insurance companies, and politicians. Accurately forecasting the bankruptcy rate would provide valuable, actionable information to individuals working in these fields. To this end, our bankruptcy rate forecasting analysis was performed using two datasets. The first, `train.csv`, contains data on bankruptcy rate, unemployment rate, population, and house price index in Canada for 28 years, from January 1987 to December 2014. Our goal is to determine which information and which time series model is most effective in forecasting the bankruptcy rate. After finalizing the model, we will then test its efficacy by forecasting the bankruptcy rate in Canada in the ensuing three years (2015 to 2017) using information from the second dataset, the `test.csv` file. This file, like the train.csv file, also contains data on unemployment rate, population and house price index. The goal is to do the best possible forecasting with a proper time series model or a set of models.
+Bankruptcy rate is an issue of concern for various interested parties, including banks, insurance companies, and politicians. Accurately forecasting the bankruptcy rate would provide valuable, actionable information to individuals working in these fields.`train.csv`, contains data on bankruptcy rate, unemployment rate, population, and house price index in Canada for 28 years, from January 1987 to December 2014. Our goal is to determine which information and which time series model is most effective in forecasting the bankruptcy rate. The goal is to do the best possible forecasting with a proper time series model or a set of models.
+
+Source code can be viewed in `bankruptcy_forecast.rmd`, however, it can also be viewed in a more user read friendly way in an R Markdown file in `bankruptcy_forecast.pdf`, which includes both source code and graphs.
+
+`final_report_and_model_explanation.pdf` further discusses why we chose our VAR model. Additionally it highlights the different modeling approaches in both univariate and multivaraite time series including Holt-Winters, Box-Jenkins, ARMA (autoregressive moving average), ARIMA (autoregressive integrated moving average), SARIMA (seasonal autoregressive moving average), double exponential smoothing, triple exponential smoothing and SARIMAX. 
+
+While the previously mentioned models are highlighted in the final report, I made a flow diagram that helps with understanding the flow of when to use which model:
+
+
+![Alt text](images/flow_chart.png?raw=true "Title")
+
 
 ### Analyzing Available Modeling Approaches
 
