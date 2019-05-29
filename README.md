@@ -1,4 +1,4 @@
-# Time Series Forecast - Forecasting Canadian bankruptcy rates using a VAR (Vector Autoregression) model.
+# Time Series Forecast - Forecasting Canadian Bankruptcy Rates using a VAR (Vector Autoregression) model.
 
 ### Motivation
 Bankruptcy rate is an issue of concern for various interested parties, including banks, insurance companies, and politicians. Accurately forecasting the bankruptcy rate would provide valuable, actionable information to individuals working in these fields. `train.csv`, contains data on bankruptcy rate, unemployment rate, population, and house price index in Canada for 28 years, from January 1987 to December 2014. Our goal is to determine which information and which time series model is most effective in forecasting the bankruptcy rate. The goal is to do the best possible forecasting with a proper time series model or a set of models.
